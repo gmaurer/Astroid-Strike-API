@@ -52,18 +52,5 @@ def connect_db():
     return cur, conn   
 
 
-def main():
-
-    astroid_strikes = requests.get("https://data.nasa.gov/resource/y77d-th95.json")
-    test = Asteroid(astroid_strikes.json()[0])
-    print(test.serialize())
-
-
-    #Thomas, create a function that utilizes this json and formats the date down to just year. 
-    #example: 'year': '1869-01-01T00:00:00.000' to 'year': '1869'
-    #Hints: For loop for data, google how to modify json in python, to modify the year look into python slice string
-
-#main()
-
-#if __name__ == "__main__":
-#    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
