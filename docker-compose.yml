@@ -1,0 +1,10 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  asteroid-strike-api:
+    build: .
+    container_name: asteroid-strike-api
+    #image: asteroid-strike-api:latest
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/web/app/asteroid_strike
