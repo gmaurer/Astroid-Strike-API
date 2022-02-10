@@ -4,6 +4,7 @@ import psycopg2
 import json
 
 from psycopg2.extras import execute_values
+from connection import Database
 from flask import Flask
 from flask_restful import Resource, Api, reqparse, abort, marshal, fields
 
@@ -29,7 +30,8 @@ def health_check():
 
 @app.route("/name/<name>", methods = ['GET'])
 def get_name(name):
-    cur, conn  = connect_db()
+    database_connection = Database()
+    cur, conn  = database_connection.connect_db()
     name_var = f"SELECT * FROM nasa_data.asteroids WHERE name = '{name}'"
     response_get = cur.execute(name_var)
     record = cur.fetchall()
@@ -43,7 +45,7 @@ def get_name(name):
 
 def connect_db():
     conn = psycopg2.connect(
-        host="localhost",
+        host="host.docker.internal",
         database="nasa_db",
         user="postgres",
         password="darling")

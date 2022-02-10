@@ -3,8 +3,36 @@ services:
   asteroid-strike-api:
     build: .
     container_name: asteroid-strike-api
+    depends_on:
+      - postgres_db
+    networks:
+      - app-tier
     #image: asteroid-strike-api:latest
     ports:
       - "5000:5000"
     volumes:
       - ./app:/web/app/asteroid_strike
+    environment:
+      - HOST="host.docker.internal"
+      - DATABASE="nasa_db"
+      - USER="postgres"
+      - PASSWORD="darling"
+      - LOG_LEVEL="DEBUG"
+
+  postgres_db:
+    image: postgres:11.1
+    environment:   # Set up postgres database name and password
+      POSTGRES_PASSWORD: darling
+      POSTGRES_DB: nasa_db
+      POSTGRES_USER: postgres
+    ports:    # Set up ports exposed for other containers to connect to
+      - 5433:5432
+    networks:
+      - app-tier
+    volumes:
+      - ./database/nasa_data.sql:/tmp/nasa_data.sql
+
+
+networks:
+  app-tier:
+    driver: bridge
