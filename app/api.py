@@ -1,4 +1,5 @@
 import requests
+import logging
 import pprint
 import psycopg2
 import json
@@ -14,15 +15,20 @@ api = Api(app)
 
 class Asteroid:
     def __init__(self, json_object):
-        self.name = json_object.get('name')
-        self.nametype = json_object.get('nametype')
-        self.recclass = json_object.get('recclass')
-        self.mass = json_object.get('mass')
-        self.fall = json_object.get('fall')
-        self.year = json_object.get('year')
-        self.reclat = json_object.get('reclat')
-        self.reclong = json_object.get('reclong')
+        logging.error(json_object)
+        json_object = list(json_object)
+        logging.error(json_object)
+        logging.error(type(json_object))
+        self.name = json_object[0]
+        self.nametype = json_object[1]
+        self.recclass = json_object[2]
+        self.mass = json_object[3]
+        self.fall = json_object[4]
+        self.year = json_object[5]
+        self.reclat = json_object[6]
+        self.reclong = json_object[7]
         #self.geolocation = json_object.get('geolocation') #convert off dict
+
 
 @app.route("/health")
 def health_check():
@@ -32,26 +38,17 @@ def health_check():
 def get_name(name):
     database_connection = Database()
     cur, conn  = database_connection.connect_db()
-    name_var = f"SELECT * FROM nasa_data.asteroids WHERE name = '{name}'"
+    name_var = f"SELECT name, nametype, recclass, mass, fall, year, reclat, reclong FROM nasa_data.asteroids WHERE name = '{name}'"
     response_get = cur.execute(name_var)
     record = cur.fetchall()
-
     record_json = json.dumps(record)
-    #class_record = Asteroid(record_json)
+    #list_of_records = []
+    #for record in record_json:
+    #    class_record = Asteroid(record_json)
     conn.commit()
     conn.close()
-    return(str(record_json))
+    return(record_json)
 
-
-def connect_db():
-    conn = psycopg2.connect(
-        host="host.docker.internal",
-        database="nasa_db",
-        user="postgres",
-        password="darling")
-
-    cur = conn.cursor()
-    return cur, conn   
 
 
 if __name__ == "__main__":

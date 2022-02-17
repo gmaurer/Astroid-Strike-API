@@ -10,13 +10,15 @@ class Database:
         self.DATABASE = os.environ["DATABASE"]
         self.USER = os.environ["USER"]
         self.PASSWORD = os.environ["PASSWORD"]
+        self.PORT = os.environ["PORT"]
 
     def connect_db(self):
         conn = psycopg2.connect(
             host=self.HOST,
             database=self.DATABASE,
             user=self.USER,
-            password=self.PASSWORD)
+            password=self.PASSWORD,
+            port=self.PORT)
 
         cur = conn.cursor()
         return cur, conn   
