@@ -6,7 +6,7 @@ import json
 
 from psycopg2.extras import execute_values
 from connection import Database
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api, reqparse, abort, marshal, fields
 
 # Initialize Flask
@@ -15,18 +15,14 @@ api = Api(app)
 
 class Asteroid:
     def __init__(self, json_object):
-        logging.error(json_object)
-        json_object = list(json_object)
-        logging.error(json_object)
-        logging.error(type(json_object))
-        self.name = json_object[0]
-        self.nametype = json_object[1]
-        self.recclass = json_object[2]
-        self.mass = json_object[3]
-        self.fall = json_object[4]
-        self.year = json_object[5]
-        self.reclat = json_object[6]
-        self.reclong = json_object[7]
+        self.name = json_object.get('name')
+        self.nametype = json_object.get('nametype')
+        self.recclass = json_object.get('recclass')
+        self.mass = json_object.get('mass')
+        self.fall = json_object.get('fall')
+        self.year = json_object.get('year')
+        self.reclat = json_object.get('reclat')
+        self.reclong = json_object.get('reclong')
         #self.geolocation = json_object.get('geolocation') #convert off dict
 
 
@@ -40,14 +36,44 @@ def get_name(name):
     cur, conn  = database_connection.connect_db()
     name_var = f"SELECT name, nametype, recclass, mass, fall, year, reclat, reclong FROM nasa_data.asteroids WHERE name = '{name}'"
     response_get = cur.execute(name_var)
-    record = cur.fetchall()
+    record = cur.fetchone()
     record_json = json.dumps(record)
     #list_of_records = []
     #for record in record_json:
     #    class_record = Asteroid(record_json)
     conn.commit()
     conn.close()
-    return(record_json)
+    response = app.response_class(
+        response=record_json,
+        status=200,
+        mimetype='application/json'
+    )
+    return(response)
+
+@app.route("/asteroid/", methods = ['POST'])
+def create_new_asteroid():
+    content_type = request.headers.get('Content-Type')
+    data = request.get_json()
+    database_connection = Database()
+    cur, conn  = database_connection.connect_db()
+    
+    new_asteroid_obj = Asteroid(data)
+    new_asteroid = tuple(new_asteroid_obj.__dict__.values())
+    logging.warning("ASTER")
+    logging.warning(new_asteroid)
+
+    try:
+        cur.execute("INSERT into nasa_data.asteroids (name,nametype,recclass,mass,fall,year,reclat,reclong) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",new_asteroid)
+    except:
+       logging.warning("NO GO") 
+    conn.commit()
+    conn.close()
+    response = app.response_class(
+        response=json.dumps(data),
+        status=201,
+        mimetype='application/json'
+    )
+    return(response)
 
 
 
